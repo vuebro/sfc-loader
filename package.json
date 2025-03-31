@@ -1,5 +1,5 @@
 {
-  "name": "vue3-sfc-loader",
+  "name": "@vues3/vue3-sfc-loader",
   "description": "Single File Component loader",
   "keywords": [
     "vue",
