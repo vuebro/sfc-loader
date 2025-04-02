@@ -19,8 +19,8 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           scope: "@vues3"
       - run: yarn install
-      - run: npm run build-web
-      - run: npm run build-node
+      - run: yarn run build-web
+      - run: yarn run build-node
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
