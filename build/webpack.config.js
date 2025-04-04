@@ -120,6 +120,8 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 	// now, exclude some plugins
 	const excludeBabelPlugins = [
 		'@babel/plugin-transform-unicode-sets-regex', // exclude because it indirectly imports regenerate-unicode-properties (about 500KB)
+		'@babel/plugin-transform-duplicate-named-capturing-groups-regex',
+		'@babel/plugin-transform-regexp-modifiers',
 	]
 	
 	pluginNameList = pluginNameList.filter(e => !excludeBabelPlugins.includes(e) );
