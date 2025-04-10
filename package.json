@@ -19,7 +19,7 @@
     "url": "git+https://github.com/vues3/vue3-sfc-loader.git"
   },
   "license": "MIT",
-  "version": "0.9.17",
+  "version": "0.9.16",
   "browserslist": "> 1%, last 8 versions, Firefox ESR and not dead",
   "browser": "./dist/vue3-sfc-loader.js",
   "main": "./dist/vue3-sfc-loader.js",
@@ -111,7 +111,7 @@
     "vm-browserify": "^1.1.2",
     "vue": "^3.5.13",
     "vue2": "npm:vue@^2.7.16",
-    "webpack": "^5.99.5",
+    "webpack": "~5.98.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1"
   },
