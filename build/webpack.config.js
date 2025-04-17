@@ -379,10 +379,7 @@ ${ pkg.name } v${ pkg.version } for vue${ vueTarget }
 
 				// Vue3
 				// exclude ./node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js template engines ('consolidate': false  this is no longer enough)
-				...Object.fromEntries(
-					'velocityjs,tinyliquid,liquid-node,jade,then-jade,dust,dustjs-helpers,dustjs-linkedin,swig,swig-templates,razor-tmpl,atpl,liquor,twig,ejs,eco,jazz,jqtpl,hamljs,hamlet,whiskers,haml-coffee,hogan.js,templayed,handlebars,underscore,lodash,pug,then-pug,qejs,walrus,mustache,just,ect,mote,toffee,dot,bracket-template,ractive,nunjucks,htmling,babel-core,plates,react-dom,react,arc-templates,vash,slm,marko,teacup,coffee-script,vm,squirrelly,twing'.split(',')
-					.map(e => ([e, false]))
-				)
+				'@vue/compiler-sfc$':  require.resolve('@vue/compiler-sfc/dist/compiler-sfc.esm-browser.js')
 
 
 			},
