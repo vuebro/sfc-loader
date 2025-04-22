@@ -38,7 +38,7 @@ import {
 	File,
 } from './types'
 
-import { createSFCModule } from './createSFCModule'
+import { createSFCModule } from './createVue3SFCModule'
 
 
 /**
