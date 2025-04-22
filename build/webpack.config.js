@@ -1,6 +1,5 @@
 const Path = require('path');
 const zlib = require('zlib')
-const fs = require('fs');
 
 const browserslist = require("browserslist");
 
@@ -13,57 +12,15 @@ const basicIdentifierReplacerPlugin = require('./basicIdentifierReplacerPlugin.j
 const requiredBabelPluginsNamesByBrowserTarget = require('./requiredBabelPluginsNamesByBrowserTarget.js');
 
 
-const dts = require('dts-bundle');
-
-class DtsBundlePlugin {
-	constructor (options) {
-		if (!options) {
-			options = {};
-		}
-		this.options = options;
-	}
-
-	_bundle (compiler, options) {
-		const logger = compiler.getInfrastructureLogger('DtsBundlePlugin');
-
-		return () => {
-			const createSFCModuleNewPath = Path.resolve(this.options.baseDir, 'createSFCModule.d.ts')
-			const createSFCModuleVue2Path = Path.resolve(this.options.baseDir, 'createVue2SFCModule.d.ts')
-			const createSFCModuleVue3Path = Path.resolve(this.options.baseDir, 'createVue3SFCModule.d.ts')
-
-			if (fs.existsSync(createSFCModuleVue2Path)) {
-				fs.renameSync(createSFCModuleVue2Path, createSFCModuleNewPath)
-			} else if (fs.existsSync(createSFCModuleVue3Path)) {
-				fs.renameSync(createSFCModuleVue3Path, createSFCModuleNewPath)
-			}
-
-			logger.info("Creating dts bundle")
-			dts.bundle(options);
-		}
-	}
-
-	apply (compiler) {
-		const bundle = (compilation) => {
-			return this._bundle(compiler, this.options);
-		}
-
-		compiler.hooks.afterEmit.tap('DtsBundlePlugin', bundle());
-	}
-}
-
 // doc: https://github.com/Nyalab/caniuse-api#api
 //const caniuse = require('caniuse-api')
 const caniuse = require('./caniuse-isSupported.js')
 
 const pkg = require('../package.json');
 
-const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, { mode = 'production', configName }) => {
-	if (configName && !configName.includes(name)) {
-		return {name}
-	}
-
+module.exports = async (env = {}, { mode = 'production' }) => {
 	const distPath = Path.resolve(__dirname, '..', 'dist');
-	const distTypesPath = Path.resolve(distPath, 'types', `vue${ vueTarget }${ libraryTargetModule ? '-esm' : ''}`)
+	const distTypesPath = Path.resolve(distPath, 'types', 'vue3-esm')
 
 	const isProd = mode === 'production';
 
@@ -92,26 +49,16 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 
 	let actualTargetsBrowsers = targetsBrowsers;
 
-	let vueVersion; // expected vue version
-	switch ( vueTarget ) {
-		case '2':
-			vueVersion = require('vue-template-compiler/package.json').version;
-			break;
-		case '3':
-			vueVersion = require('@vue/compiler-sfc/package.json').version;
-			break;
-		default:
-			throw new Error(`invalid vueTarget: ${ vueTarget }`)
-	}
+	const vueVersion = require('@vue/compiler-sfc/package.json').version; // expected vue version
 
 	// "or" / ","" -> union
 	// "and" -> intersection
 	// "not" -> relative complement
 
 	// excludes cases that make no sense 
-	actualTargetsBrowsers += ( libraryTargetModule ? ' and supports es6-module' : '' ) + ( vueTarget == 3 ? ' and supports proxy' : '' );
+	actualTargetsBrowsers += ' and supports es6-module and supports proxy';
 
-	console.log('config', { actualTargetsBrowsers, noPresetEnv, noCompress, noSourceMap, genSourcemap, libraryTargetModule, vueTarget });
+	console.log('config', { actualTargetsBrowsers, noPresetEnv, noCompress, noSourceMap, genSourcemap });
 
 	if ( browserslist(actualTargetsBrowsers).length === 0 )
 		throw new RangeError('browserslist(' + actualTargetsBrowsers + ') selects no browsers');
@@ -131,10 +78,10 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 	const ___targetBrowserBabelPlugins = '{' + pluginNameList.map(e => `'${ e }': require('${ e }'),\n`).join('') + '}';
 
 	return {
-		name,
+		name: 'vue3esm',
 
 		experiments: {
-			outputModule: libraryTargetModule,
+			outputModule: true,
 		},
 
 		entry: [
@@ -143,17 +90,8 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 
 		output: {
 			path: distPath,
-			filename: `vue${ vueTarget }-sfc-loader${ libraryTargetModule ? '.esm' : '' }.js`,
-			...libraryTargetModule ? {
-
-				libraryTarget: 'module',
-			} : {
-
-				library: {
-					type: 'umd',
-					name: `vue${ vueTarget }-sfc-loader`,
-				},
-			},
+			filename: 'vue3-sfc-loader.esm.js',
+			libraryTarget: 'module',
 			environment: {
 				// doc: https://webpack.js.org/configuration/output/#outputenvironment
 				...!noPresetEnv ? {
@@ -179,16 +117,6 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 		},
 
 		plugins: [
-			...!libraryTargetModule ? [
-/*				
-				new DtsBundlePlugin({
-					name: `vue${ vueTarget }-sfc-loader`,
-					main:`${distTypesPath}/src/index.d.ts`,
-					baseDir: `${distTypesPath}/src`,
-					out: `${distPath}/vue${ vueTarget }-sfc-loader.d.ts`
-				})
-*/
-			] : [],
 
 			new Webpack.DefinePlugin({
 
@@ -276,23 +204,20 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 					}),
 				] : [],
 
-				...!libraryTargetModule ? [
+				new DuplicatePackageCheckerPlugin(),
+				new BundleAnalyzerPlugin({
+					// doc: https://github.com/webpack-contrib/webpack-bundle-analyzer#options-for-plugin
+					analyzerMode: 'static',
+					openAnalyzer: false,
+					reportFilename: 'vue3-sfc-loader.report.esm.html'
+				})
 
-					new DuplicatePackageCheckerPlugin(),
-					new BundleAnalyzerPlugin({
-						// doc: https://github.com/webpack-contrib/webpack-bundle-analyzer#options-for-plugin
-						analyzerMode: 'static',
-						openAnalyzer: false,
-						reportFilename: `vue${ vueTarget }-sfc-loader.report${ libraryTargetModule ? '.esm' : '' }.html`
-					})
-
-				] : [],
 			] : [],
 
 			new Webpack.BannerPlugin(`
-${ pkg.name } v${ pkg.version } for vue${ vueTarget }
+${ pkg.name } v${ pkg.version } for vue3
 
-@description Vue${ vueTarget } ${ pkg.description }.
+@description Vue3 ${ pkg.description }.
 @author      ${ pkg.author.name } <${ pkg.author.email }>
 @license     ${ pkg.license }
 @sources     https://github.com/FranckFreiburger/vue3-sfc-loader
@@ -305,8 +230,6 @@ ${ pkg.name } v${ pkg.version } for vue${ vueTarget }
 			alias: {
 
 				'util$': require.resolve('util/'),
-
-				'./createSFCModule$': `./createVue${ vueTarget }SFCModule`,
 
 				// dedupe (see DuplicatePackageCheckerPlugin result)
 				'bn.js$': require.resolve('bn.js'),
@@ -355,14 +278,6 @@ ${ pkg.name } v${ pkg.version } for vue${ vueTarget }
 
 				'semver': false,
 				
-				// vue2
-				'sass': false,
-				'stylus': false,
-				'less': false,
-				'prettier': false,
-				'./buble.js$': Path.resolve(__dirname, 'fakeBuble.mjs'), // used by vue-template-es2015-compiler
-				'./styleProcessors$': Path.resolve(__dirname, 'vue2StyleProcessors.ts'), // used by @vue/component-compiler-utils
-
 				...!genSourcemap ? {
 					'source-map': false,
 					'merge-source-map': false,
@@ -485,12 +400,3 @@ ${ pkg.name } v${ pkg.version } for vue${ vueTarget }
 		}
 	}
 }
-
-let configs = [
-	{name: 'vue2', vueTarget: '2', libraryTargetModule: false },
-	{name: 'vue2esm', vueTarget: '2', libraryTargetModule: true },
-	{name: 'vue3', vueTarget: '3', libraryTargetModule: false },
-	{name: 'vue3esm', vueTarget: '3', libraryTargetModule: true },
-]
-
-module.exports = configs.map(configure)
