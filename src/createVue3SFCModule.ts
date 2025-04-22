@@ -10,9 +10,6 @@ import {
 
 import * as vue_CompilerDOM from '@vue/compiler-dom'
 
-// https://github.com/vuejs/jsx-next
-import babelPlugin_jsx from '@vue/babel-plugin-jsx'
-
 // @ts-ignore (TS7016: Could not find a declaration file for module '@babel/plugin-transform-typescript'.)
 import babelPlugin_typescript from '@babel/plugin-transform-typescript'
 
@@ -158,8 +155,8 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				],
 				async ({ preventCache }) => {
 
-			let contextBabelParserPlugins : Options['additionalBabelParserPlugins'] = ['jsx'];
-			let contextBabelPlugins: Options['additionalBabelPlugins'] = { jsx: babelPlugin_jsx };
+			let contextBabelParserPlugins : Options['additionalBabelParserPlugins'] = [];
+			let contextBabelPlugins: Options['additionalBabelPlugins'] = {};
 			
 			if (descriptor.script?.lang === 'ts' || descriptor.scriptSetup?.lang === 'ts') {
 				
