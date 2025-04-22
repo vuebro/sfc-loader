@@ -138,7 +138,6 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 		},
 
 		entry: [
-			Path.resolve(__dirname, '../src/bootstrap.js'),
 			Path.resolve(__dirname, '../src/index.ts'),
 		],
 
