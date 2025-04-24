@@ -21,18 +21,6 @@ export * from './types'
 
 
 /**
- * the version of the library (process.env.VERSION is set by webpack, at compile-time)
- */
-export const version : string = process.env.VERSION as string;
-
-
-/**
- * the version of Vue that is expected by the library
- */
-export const vueVersion : string = process.env.VUE_VERSION as string;
-
-
-/**
  * @internal
  */
 function throwNotDefined(details : string) : never {

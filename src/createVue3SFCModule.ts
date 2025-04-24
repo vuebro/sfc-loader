@@ -6,9 +6,13 @@ import {
 	compileTemplate as sfc_compileTemplate,
 	SFCAsyncStyleCompileOptions,
 	SFCTemplateCompileOptions,
+	version as vueVersion,
 } from '@vue/compiler-sfc'
 
 import * as vue_CompilerDOM from '@vue/compiler-dom'
+
+// https://github.com/vuejs/jsx-next
+import babelPlugin_jsx from '@vue/babel-plugin-jsx'
 
 // @ts-ignore (TS7016: Could not find a declaration file for module '@babel/plugin-transform-typescript'.)
 import babelPlugin_typescript from '@babel/plugin-transform-typescript'
@@ -37,20 +41,15 @@ import {
  */
 type PreprocessLang = SFCAsyncStyleCompileOptions['preprocessLang'];
 
-/**
- * the version of the library
- */
-import { version, vueVersion } from './index'
-
 // @ts-ignore
 const targetBrowserBabelPluginsHash : string = hash(...Object.keys({ ...(typeof ___targetBrowserBabelPlugins !== 'undefined' ? ___targetBrowserBabelPlugins : {}) }));
 
-const genSourcemap : boolean = !!process.env.GEN_SOURCEMAP;
+const genSourcemap : boolean = false;
 
 /**
  * @internal
  */
-const isProd : boolean = process.env.NODE_ENV === 'production';
+const isProd : boolean = true;
 
 
 
@@ -155,8 +154,8 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				],
 				async ({ preventCache }) => {
 
-			let contextBabelParserPlugins : Options['additionalBabelParserPlugins'] = [];
-			let contextBabelPlugins: Options['additionalBabelPlugins'] = {};
+			let contextBabelParserPlugins : Options['additionalBabelParserPlugins'] = ['jsx'];
+			let contextBabelPlugins: Options['additionalBabelPlugins'] = { jsx: babelPlugin_jsx };
 			
 			if (descriptor.script?.lang === 'ts' || descriptor.scriptSetup?.lang === 'ts') {
 				

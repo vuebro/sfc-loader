@@ -20,82 +20,28 @@
   },
   "license": "MIT",
   "version": "0.9.21",
-  "browserslist": "> 1%, last 8 versions, Firefox ESR and not dead",
-  "browser": "./dist/vue3-sfc-loader.js",
-  "main": "./dist/vue3-sfc-loader.js",
-  "module": "./dist/vue3-sfc-loader.esm.js",
-  "types": "./dist/types/vue3-esm/index.d.ts",
-  "exports": {
-    ".": {
-      "node": {
-        "import": "./dist/vue3-sfc-loader-node.mjs",
-        "require": "./dist/vue3-sfc-loader-node.js"
-      },
-      "import": "./dist/vue3-sfc-loader.esm.js",
-      "require": "./dist/vue3-sfc-loader.js"
-    },
-    "./vue2": {
-      "node": {
-        "import": "./dist/vue2-sfc-loader-node.mjs",
-        "require": "./dist/vue2-sfc-loader-node.js"
-      },
-      "import": "./dist/vue2-sfc-loader.esm.js",
-      "require": "./dist/vue2-sfc-loader.js"
-    },
-    "./dist/*": "./dist/*",
-    "./package.json": "./package.json"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "dev": "webpack --mode=development --config ./build/webpack.config.js --progress --watch",
-    "build-web": "rimraf ./dist/ && cross-env-shell webpack --mode=production --config ./build/webpack.config.js --progress --env targetsBrowsers=\\\"$npm_package_browserslist\\\"",
-    "build-node": "rollup --config ./build/rollup.config-node.mjs"
+    "build": "webpack"
   },
   "devDependencies": {
-    "@babel/helper-simple-access": "^7.25.9",
-    "@babel/preset-env": "^7.26.9",
-    "@rollup/plugin-replace": "^6.0.2",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.1.2",
     "@types/babel__code-frame": "^7.0.6",
     "@types/babel__core": "^7.20.5",
     "@types/spark-md5": "^3.0.5",
-    "assert": "^2.1.0",
-    "babel-loader": "^10.0.0",
-    "bn.js": "^5.2.1",
-    "compression-webpack-plugin": "^11.1.0",
-    "core-js": "^3.41.0",
-    "cross-env": "^7.0.3",
-    "duplicate-package-checker-webpack-plugin": "^3.0.0",
-    "lru-cache": "^8.0.5",
-    "memory-fs": "^0.5.0",
-    "path-browserify": "^1.0.1",
-    "process": "^0.11.10",
-    "rimraf": "^6.0.1",
-    "rollup": "^4.40.0",
-    "safe-buffer": "^5.2.1",
-    "semver": "^7.7.1",
-    "terser-webpack-plugin": "^5.3.14",
     "ts-loader": "^9.5.2",
-    "tslib": "^2.8.1",
-    "typescript": "^5.8.3",
-    "util": "^0.12.5",
-    "webpack": "^5.99.6",
-    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1",
-    "lodash.memoize": "^4.1.2",
-    "lodash.uniq": "^4.5.0"
+    "node-polyfill-webpack-plugin": "^4.1.0"
   },
   "dependencies": {
     "@babel/code-frame": "^7.26.2",
     "@babel/core": "^7.26.10",
-    "@babel/generator": "^7.27.0",
-    "@babel/helper-split-export-declaration": "^7.24.7",
     "@babel/parser": "^7.27.0",
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
     "@babel/plugin-transform-typescript": "^7.27.0",
+    "@vue/babel-plugin-jsx": "^1.4.0",
     "@vue/compiler-dom": "^3.5.13",
     "@vue/compiler-sfc": "^3.5.13",
-    "@vue/shared": "^3.5.13",
     "spark-md5": "^3.0.2"
   }
 }

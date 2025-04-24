@@ -44,9 +44,7 @@ import { createSFCModule } from './createVue3SFCModule'
 /**
  * @internal
  */
-const genSourcemap : boolean = !!process.env.GEN_SOURCEMAP;
-
-const version : string = process.env.VERSION as string;
+const genSourcemap : boolean = false;
 
 
 // tools
@@ -366,7 +364,6 @@ export async function createJSModule(source : string, moduleSourceType : boolean
 		await withCache(
 			compiledCache,
 			[
-				version,
 				source,
 				filename,
 				options.devMode,
