@@ -273,7 +273,7 @@ export async function transformJSCode(source : string, moduleSourceType : boolea
 
 export async function loadModuleInternal(pathCx : PathContext, options : Options) : Promise<ModuleExport> {
 
-	const { moduleCache, loadModule, handleModule } = options;
+	const { moduleCache, loadModule, addStyle } = options;
 
 	const { id, path, getContent } = options.getResource(pathCx, options);
 
@@ -298,14 +298,28 @@ export async function loadModuleInternal(pathCx : PathContext, options : Options
 
 			const { getContentData, type } = await getContent();
 
-			if ( handleModule !== undefined )
-				module = await handleModule(type, getContentData, path, options);
+			switch (type) {
+				case '.vue': 
+					module = await createSFCModule((await getContentData(false)) as string, path, options);
+					break;
+				case ".css":
+					addStyle((await getContentData(false)) as string, path.toString());
+					break;
+				// case "css": {
+				//   const { default: css } = (await getContentData(false)) as unknown as {
+				//     default: CSSStyleSheet;
+				//   };
+				//   document.adoptedStyleSheets = [...document.adoptedStyleSheets, css];
+				//   break;
+				// }
+				case ".js":
+				case '.mjs':
+					module = await getContentData(false);
+					break;
+				default:
+					throw new TypeError(`Unable to handle ${ type } files (${ path })`);
+			}
 
-			if ( module === undefined )
-				module = await handleModuleInternal(type, getContentData, path, options);
-
-			if ( module === undefined )
-				throw new TypeError(`Unable to handle ${ type } files (${ path })`);
 		}
 
 		return moduleCache[id] = module;
@@ -387,24 +401,4 @@ export async function createJSModule(source : string, moduleSourceType : boolean
 export async function loadDeps(refPath : AbstractPath, deps : AbstractPath[], options : Options) : Promise<void> {
 
 	await Promise.all(deps.map(relPath => loadModuleInternal({ refPath, relPath }, options)))
-}
-
-
-/**
- * Default implementation of handleModule
- */
- async function handleModuleInternal(type : string, getContentData : File['getContentData'], path : AbstractPath, options : Options) : Promise<ModuleExport | undefined> {
-
-	switch (type) {
-		case '.vue': return createSFCModule((await getContentData(false)) as string, path, options);
-		case '.js': return createJSModule((await getContentData(false)) as string, false, path, options);
-		case '.mjs': return createJSModule((await getContentData(false)) as string, true, path, options);
-		case '.ts': return createJSModule((await getContentData(false)) as string, true, path, {
-			...options,
-			additionalBabelParserPlugins: [ 'typescript', ...(options.additionalBabelParserPlugins ?? []) ],
-			additionalBabelPlugins: { typescript: babelPlugin_typescript, ...(options.additionalBabelPlugins ?? {}) }
-		});
-	}
-
-	return undefined;
 }
