@@ -262,7 +262,7 @@ export type Options = {
  * note: this option has no effect on vue2
  */
 
-	isCustomElement : ((tag: string) => boolean) | undefined,
+	isCustomElement?: ((tag: string) => boolean) | undefined,
 
 
 /**
@@ -285,13 +285,6 @@ export type Options = {
  *	```
 */
 	additionalBabelPlugins?: Record<string, any>,
-
-
-/**
- * Handle additional module types (eg. '.svg', '.json' ). see [[ModuleHandler]]
- *
-*/
-	handleModule?: ModuleHandler,
 
 
 /**
@@ -377,7 +370,7 @@ export type Options = {
  * creates a CommonJS module from JS source string.
  * *(optional)* 
  */
-	createCJSModule(refPath : AbstractPath, source : string, options : Options) : Module,
+	createCJSModule?(refPath : AbstractPath, source : string, options : Options) : Module,
 
 
 
@@ -385,7 +378,7 @@ export type Options = {
  * Abstact path handling
  * *(optional)*
  */
- 	pathResolve : PathResolve,
+ 	pathResolve?: PathResolve,
 
 /**
  * by default, remove the search string
@@ -393,14 +386,14 @@ export type Options = {
  * @param path  a path that may contains extra components like search params or hash (eg. ./mydir/mycomponent.vue?v=123)
  * @returns the pathname component of the path withouy any orher component (eg. ./mydir/mycomponent.vue)
  */	
-	getPathname : (path : string) => string,
+	getPathname?: (path : string) => string,
 
 /**
  * Abstact resource handling
  * *(optional)*
  *
  */
-	getResource(pathCx : PathContext, options : Options) : Resource,
+	getResource?(pathCx : PathContext, options : Options) : Resource,
 
 
 
@@ -438,7 +431,7 @@ export type Options = {
  * @param lang 
  * @param filename 
  */
-	processStyles(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : Promise<string>,
+	processStyles?(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : Promise<string>,
 	  
 }
 
