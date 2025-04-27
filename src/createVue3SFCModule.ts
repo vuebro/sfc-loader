@@ -22,7 +22,6 @@ import {
 	interopRequireDefault,
 	transformJSCode,
 	loadDeps,
-	loadModuleInternal,
 	createCJSModule,
 	getResource,
 } from './tools'
@@ -71,7 +70,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		additionalBabelPlugins = {},
 		customBlockHandler,
 		devMode = false,
-		processStyles,
 	} = options;
 
 	// vue-loader next: https://github.com/vuejs/vue-loader/blob/next/src/index.ts#L91
@@ -94,11 +92,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		component.__scopeId = scopeId;
 	}
 
-	// hack: asynchronously preloads the language processor before it is required by the synchronous preprocessCustomRequire() callback, see below
-	if ( descriptor.template && descriptor.template.lang )
-		await loadModuleInternal({ refPath: filename, relPath: descriptor.template.lang }, options);
-
-
 	const compileTemplateOptions : SFCTemplateCompileOptions|undefined = descriptor.template ? {
 		// hack, since sourceMap is not configurable an we want to get rid of source-map dependency. see genSourcemap
 		compiler: { ...vue_CompilerDOM, compile: (template, opts) => vue_CompilerDOM.compile(template, { ...opts, sourceMap: genSourcemap }) },
@@ -116,8 +109,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			mode: 'module', // see: https://github.com/vuejs/vue-next/blob/15baaf14f025f6b1d46174c9713a2ec517741d0d/packages/compiler-core/src/options.ts#L160
 		},
 		//	transformAssetUrls
-		preprocessLang: descriptor.template.lang,
-		preprocessCustomRequire: id => moduleCache[id], // makes consolidate optional, see https://github.com/vuejs/vue-next/blob/15baaf14f025f6b1d46174c9713a2ec517741d0d/packages/compiler-sfc/src/compileTemplate.ts#L111-L113
 	} : undefined;
 
 	if ( descriptor.script || descriptor.scriptSetup ) {
@@ -249,14 +240,10 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				],
 				async ({ preventCache }) => {
 
-			const src = processStyles !== undefined ? await processStyles(srcRaw, descStyle.lang, filename, options) : srcRaw;
+			const src = srcRaw;
 
 			if ( src === undefined )
 				preventCache();
-
-			// hack: asynchronously preloads the language processor before it is required by the synchronous preprocessCustomRequire() callback, see below
-			if ( processStyles === undefined && descStyle.lang !== undefined )
-				await loadModuleInternal({ refPath: filename, relPath: descStyle.lang }, options);
 
 			// src: https://github.com/vuejs/vue-next/blob/15baaf14f025f6b1d46174c9713a2ec517741d0d/packages/compiler-sfc/src/compileStyle.ts#L70
 			const compiledStyle = await sfc_compileStyleAsync({
@@ -266,10 +253,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				id: scopeId,
 				scoped: descStyle.scoped,
 				trim: true,
-				...processStyles === undefined ? {
-					preprocessLang: descStyle.lang as PreprocessLang,
-					preprocessCustomRequire: id => moduleCache[id],
-				} : {},
 			});
 
 			if ( compiledStyle.errors.length ) {
