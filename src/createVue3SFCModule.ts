@@ -38,9 +38,6 @@ import {
  */
 type PreprocessLang = SFCAsyncStyleCompileOptions['preprocessLang'];
 
-// @ts-ignore
-const targetBrowserBabelPluginsHash : string = hash(...Object.keys({ ...(typeof ___targetBrowserBabelPlugins !== 'undefined' ? ___targetBrowserBabelPlugins : {}) }));
-
 const genSourcemap : boolean = false;
 
 /**
@@ -147,7 +144,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 					descriptor.scriptSetup?.lang,
 					additionalBabelParserPlugins,
 					Object.keys(additionalBabelPlugins),
-					targetBrowserBabelPluginsHash,
 				],
 				async ({ preventCache }) => {
 
@@ -205,7 +201,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 					compileTemplateOptions.compilerOptions.bindingMetadata ? Object.entries(compileTemplateOptions.compilerOptions.bindingMetadata) : '',
 					additionalBabelParserPlugins,
 					Object.keys(additionalBabelPlugins),
-					targetBrowserBabelPluginsHash,
 				],
 				async ({ preventCache }) => {
 
