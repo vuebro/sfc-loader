@@ -394,14 +394,6 @@ export type Options = {
  */
 	devMode?: boolean,
 
-/**
- * 
- * @param srcRaw 
- * @param lang 
- * @param filename 
- */
-	processStyles?(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : Promise<string>,
-	  
 }
 
 
