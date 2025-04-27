@@ -171,35 +171,6 @@ export function formatErrorLineColumn(message : string, path : string, source : 
 
 
 /**
- * Simple cache helper
- * preventCache usage: non-fatal error
- * @internal
- */
-export async function withCache( cacheInstance : Cache|undefined, key : any[], valueFactory : ValueFactory ) : Promise<any> {
-
-	let cachePrevented = false;
-
-	const api = {
-		preventCache: () => cachePrevented = true,
-	}
-
-	if ( cacheInstance === undefined )
-		return await valueFactory(api);
-
-	const hashedKey = hash(...key);
-	const valueStr = await cacheInstance.get(hashedKey);
-	if ( valueStr !== undefined )
-		return JSON.parse(valueStr);
-
-	const value = await valueFactory(api);
-
-	if ( cachePrevented === false )
-		await cacheInstance.set(hashedKey, JSON.stringify(value));
-
-	return value;
-}
-
-/**
  * @internal
  */
 export class Loading {
