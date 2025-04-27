@@ -7,7 +7,14 @@ const dirname = fileURLToPath(new URL('.', import.meta.url));
 export default {
   entry: [join(dirname, "src/index.ts")],
   experiments: { outputModule: true },
-  externals: ["@vue/compiler-sfc", "@vue/shared"],
+  externals: [
+    "@vue/compiler-sfc",
+    "@vue/shared",
+    "@babel/parser",
+    "@babel/code-frame",
+    "@babel/traverse",
+    "spark-md5"
+  ],
   mode: "production",
   module: {
     rules: [
