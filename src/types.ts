@@ -267,44 +267,4 @@ export type Options = {
 	additionalBabelPlugins?: Record<string, any>,
 
 
-/**
- * [[get]]() and [[set]]() functions of this object are called when the lib needs to save or load already compiled code. get and set functions must return a `Promise` (or can be `async`).
- * Since compilation consume a lot of CPU, is is always a good idea to provide this object.
- *
- * **example:**
- *
- * In the following example, we cache the compiled code in the browser's local storage. Note that local storage is a limited place (usually 5MB).
- * Here we handle space limitation in a very basic way.
- * Maybe (not tested), the following libraries may help you to gain more space [pako](https://github.com/nodeca/pako), [lz-string](https://github.com/pieroxy/lz-string/)
- * ```javascript
- *	...
- *	compiledCache: {
- *		set(key, str) {
- *	
- *			// naive storage space management
- *			for (;;) {
- *	
- *				try {
- *	
- *					// doc: https://developer.mozilla.org/en-US/docs/Web/API/Storage
- *					window.localStorage.setItem(key, str);
- *					break;
- *				} catch(ex) {
- *					// here we handle DOMException: Failed to execute 'setItem' on 'Storage': Setting the value of 'XXX' exceeded the quota
- *	
- *					window.localStorage.removeItem(window.localStorage.key(0));
- *				}
- *			}
- *		},
- *		get(key) {
- *	
- *			return window.localStorage.getItem(key) ?? undefined;
- *		},
- *	},
- *	...
- * ```
- */
-	compiledCache?: Cache,
-
-
 }
