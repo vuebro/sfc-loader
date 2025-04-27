@@ -17,7 +17,6 @@ import babelPlugin_typescript from '@babel/plugin-transform-typescript'
 import {
 	formatErrorLineColumn,
 	formatError,
-	withCache,
 	hash,
 	interopRequireDefault,
 	transformJSCode,
@@ -62,7 +61,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		delimiters,
 		whitespace,
 		isCustomElement,
-		compiledCache,
 		addStyle,
 		additionalBabelParserPlugins = [],
 		additionalBabelPlugins = {},
@@ -116,21 +114,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 
 		// TBD: handle <script setup src="...
 
-		const [bindingMetadata, depsList, transformedScriptSource] =
-			await withCache(
-				compiledCache,
-				[
-					vueVersion,
-					isProd,
-					descriptor.script?.content,
-					descriptor.script?.lang,
-					descriptor.scriptSetup?.content,
-					descriptor.scriptSetup?.lang,
-					additionalBabelParserPlugins,
-					Object.keys(additionalBabelPlugins),
-				],
-				async ({ preventCache }) => {
-
 			let contextBabelParserPlugins : Options['additionalBabelParserPlugins'] = [];
 			let contextBabelPlugins: Options['additionalBabelPlugins'] = {};
 			
@@ -156,9 +139,9 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			// note:
 			//   scriptBlock.content is the script code after vue transformations
 			//   scriptBlock.scriptAst is the script AST before vue transformations
-			return [scriptBlock.bindings, ...await transformJSCode(scriptBlock.content, true, strFilename, [ ...contextBabelParserPlugins, ...additionalBabelParserPlugins ], { ...contextBabelPlugins, ...additionalBabelPlugins })];
+			const [bindingMetadata, depsList, transformedScriptSource] =
+			[scriptBlock.bindings, ...await transformJSCode(scriptBlock.content, true, strFilename, [ ...contextBabelParserPlugins, ...additionalBabelParserPlugins ], { ...contextBabelPlugins, ...additionalBabelPlugins })];
 
-		});
 
 		// see https://github.com/vuejs/vue-loader/blob/12aaf2ea77add8654c50c8751bad135f1881e53f/src/templateLoader.ts#L54
 		if ( compileTemplateOptions?.compilerOptions !== undefined )
@@ -172,26 +155,12 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 	if ( descriptor.template !== null ) {
 		// compiler-sfc src: https://github.com/vuejs/vue-next/blob/15baaf14f025f6b1d46174c9713a2ec517741d0d/packages/compiler-sfc/src/compileTemplate.ts#L39
 		// compileTemplate eg: https://github.com/vuejs/vue-loader/blob/next/src/templateLoader.ts#L33
-		const [templateDepsList, templateTransformedSource] =
-			await withCache(
-				compiledCache,
-				[
-					vueVersion,
-					compileTemplateOptions.source,
-					compileTemplateOptions.compilerOptions.delimiters,
-					compileTemplateOptions.compilerOptions.whitespace,
-					compileTemplateOptions.compilerOptions.scopeId,
-					compileTemplateOptions.compilerOptions.bindingMetadata ? Object.entries(compileTemplateOptions.compilerOptions.bindingMetadata) : '',
-					additionalBabelParserPlugins,
-					Object.keys(additionalBabelPlugins),
-				],
-				async ({ preventCache }) => {
+		
 
 			const template = sfc_compileTemplate(compileTemplateOptions);
 
 			if ( template.errors.length ) {
 
-				preventCache();
 				for ( const err of template.errors ) {
 					if (typeof err === 'object') {
 						if (err.loc) {
@@ -208,8 +177,8 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			for ( const err of template.tips )
 				log?.('info', 'SFC template', err);
 
-			return await transformJSCode(template.code, true, descriptor.filename, additionalBabelParserPlugins, additionalBabelPlugins);
-		});
+			const [templateDepsList, templateTransformedSource] =
+			await transformJSCode(template.code, true, descriptor.filename, additionalBabelParserPlugins, additionalBabelPlugins);
 
 		await loadDeps(filename, templateDepsList, options);
 		Object.assign(component, createCJSModule(filename, templateTransformedSource, options).exports);
@@ -220,22 +189,8 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 
 		const srcRaw = descStyle.src ? (await (await getResource({ refPath: filename, relPath: descStyle.src }, options).getContent()).getContentData(false)) as string : descStyle.content;
 		
-		const style =
-			await withCache(
-				compiledCache,
-				[
-					vueVersion,
-					srcRaw,
-					descStyle.lang,
-					scopeId,
-					descStyle.scoped,
-				],
-				async ({ preventCache }) => {
 
 			const src = srcRaw;
-
-			if ( src === undefined )
-				preventCache();
 
 			// src: https://github.com/vuejs/vue-next/blob/15baaf14f025f6b1d46174c9713a2ec517741d0d/packages/compiler-sfc/src/compileStyle.ts#L70
 			const compiledStyle = await sfc_compileStyleAsync({
@@ -249,7 +204,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 
 			if ( compiledStyle.errors.length ) {
 
-				preventCache();
 				for ( const err of compiledStyle.errors ) {
 
 					// @ts-ignore (Property 'line' does not exist on type 'Error' and Property 'column' does not exist on type 'Error')
@@ -257,8 +211,8 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				}
 			}
 
-			return compiledStyle.code;
-		});
+			const style =
+			compiledStyle.code;
 
 		addStyle(style, descStyle.scoped ? scopeId : undefined);
 	}
