@@ -24,12 +24,12 @@ import {
 	loadDeps,
 	createCJSModule,
 	getResource,
+	log,
 } from './tools'
 
 import {
 	Options,
 	ModuleExport,
-	CustomBlockCallback,
 	AbstractPath
 } from './types'
 
@@ -62,13 +62,10 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		delimiters,
 		whitespace,
 		isCustomElement,
-		moduleCache,
 		compiledCache,
 		addStyle,
-		log,
 		additionalBabelParserPlugins = [],
 		additionalBabelPlugins = {},
-		customBlockHandler,
 	} = options;
 
 	// vue-loader next: https://github.com/vuejs/vue-loader/blob/next/src/index.ts#L91
@@ -77,8 +74,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		sourceMap: genSourcemap,
 	});
 
-
-	const customBlockCallbacks : (CustomBlockCallback|undefined)[] = customBlockHandler !== undefined ? await Promise.all( descriptor.customBlocks.map((block) => customBlockHandler(block, filename, options)) ) : [];
 
 	const scopeId = `data-v-${hash(strFilename)}`;
 
@@ -161,7 +156,7 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			// note:
 			//   scriptBlock.content is the script code after vue transformations
 			//   scriptBlock.scriptAst is the script AST before vue transformations
-			return [scriptBlock.bindings, ...await transformJSCode(scriptBlock.content, true, strFilename, [ ...contextBabelParserPlugins, ...additionalBabelParserPlugins ], { ...contextBabelPlugins, ...additionalBabelPlugins }, log)];
+			return [scriptBlock.bindings, ...await transformJSCode(scriptBlock.content, true, strFilename, [ ...contextBabelParserPlugins, ...additionalBabelParserPlugins ], { ...contextBabelPlugins, ...additionalBabelPlugins })];
 
 		});
 
@@ -213,7 +208,7 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			for ( const err of template.tips )
 				log?.('info', 'SFC template', err);
 
-			return await transformJSCode(template.code, true, descriptor.filename, additionalBabelParserPlugins, additionalBabelPlugins, log);
+			return await transformJSCode(template.code, true, descriptor.filename, additionalBabelParserPlugins, additionalBabelPlugins);
 		});
 
 		await loadDeps(filename, templateDepsList, options);
@@ -267,9 +262,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 
 		addStyle(style, descStyle.scoped ? scopeId : undefined);
 	}
-
-	if ( customBlockHandler !== undefined )
-		await Promise.all(customBlockCallbacks.map(cb => cb?.(component)));
 
 	return component;
 }
