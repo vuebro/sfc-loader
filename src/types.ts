@@ -98,26 +98,6 @@ export type Resource = {
 }
 
 /**
- * CustomBlockCallback function type
- */
-export type CustomBlockCallback = ( component : ModuleExport ) => void;
-
-
-/**
- * A custom block
- */
-export type CustomBlock = {
-	type: string,
-	content: string,
-	attrs: Record<string, string | true>,
-//	loc: SourceLocation
-//	map?: RawSourceMap
-//	lang?: string
-//	src?: string
-}
-
-
-/**
  * This just represents a loaded js module exports
  */
 export type ModuleExport = {} | null
@@ -327,68 +307,4 @@ export type Options = {
 	compiledCache?: Cache,
 
 
-/**
- * Called by the library when there is somthing to log (eg. scripts compilation errors, template compilation errors, template compilation  tips, style compilation errors, ...)
- * @param type the type of the notification, it respects console property names (error, warn, info).
- * @param args the values to log
- * @return
- *
- * ```javascript
- *	...
- *	log(type, ...args) {
- *	
- *		console.log(type, ...args);
- *	},
- *	...
- * ```
- */
-	log?(type : string, ...data : any[]) : void,
-
-
-/**
- * Called when the lib requires a module. Do return `undefined` to let the library handle this.
- * @param path  The path of the module.
- * @param options  The options object.
- * @returns A Promise of the module or undefined
- *
- * [[moduleCache]] and [[Options.loadModule]] are strongly related, in the sense that the result of [[options.loadModule]] is stored in [[moduleCache]].
- * However, [[options.loadModule]] is asynchronous and may help you to handle modules or components that are conditionally required (optional features, current languages, plugins, ...).
- * ```javascript
- *	...
- *	loadModule(path, options) {
- *	
- *		if ( path === 'vue' )
- *			return Vue;
- *		},
- *	...
- * ```
- */
-	loadModule?(path : AbstractPath, options : Options) : Promise<ModuleExport | undefined>,
-
-
-/**
- * Called for each custom block.
- * @returns A Promise of the module or undefined
- *
- * ```javascript
- *	...
- *	customBlockHandler(block, filename, options) {
- *	
- *		if ( block.type !== 'i18n' )
- *			 return;
- *	
- *		return (component) => {
- *	
- *			component.i18n = JSON.parse(block.content);
- *		}
- *	}
- *	...
- * ```
- */
- 	customBlockHandler?(block : CustomBlock, filename : AbstractPath, options : Options) : Promise<CustomBlockCallback | undefined>,
-	
-	  
 }
-
-
-export type LangProcessor = (source: string, preprocessOptions?: any) => Promise<string> | string
