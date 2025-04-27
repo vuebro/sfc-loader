@@ -181,10 +181,6 @@ export function parseDeps(fileAst : t.File) : string[] {
 }
 
 
-// @ts-ignore
-const targetBrowserBabelPlugins = { ...(typeof ___targetBrowserBabelPlugins !== 'undefined' ? ___targetBrowserBabelPlugins : {}) };
-
-
 /**
  * @internal
  */
@@ -216,8 +212,6 @@ export async function transformJSCode(source : string, moduleSourceType : boolea
 		sourceMaps: genSourcemap, // doc: https://babeljs.io/docs/en/options#sourcemaps
 		plugins: [ // https://babeljs.io/docs/en/options#plugins
 			...moduleSourceType ? [ babelPluginTransformModulesCommonjs ] : [], // https://babeljs.io/docs/en/babel-plugin-transform-modules-commonjs#options
-			// @ts-ignore
-			...Object.values(targetBrowserBabelPlugins),
 			...additionalBabelPlugins !== undefined ? Object.values(additionalBabelPlugins) : [],
 		],
 		babelrc: false,
