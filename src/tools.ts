@@ -2,8 +2,10 @@ import {
 	posix as Path
 } from 'path'
 
-import traverse from '@babel/traverse';
+import type { ParserPlugin } from '@babel/parser';
 import type { NodePath } from '@babel/traverse';
+
+import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import {
 	transformFromAstAsync as babel_transformFromAstAsync,
@@ -24,9 +26,7 @@ import babelPluginTransformModulesCommonjs from '@babel/plugin-transform-modules
 import SparkMD5 from 'spark-md5'
 
 import {
-	Cache,
 	Options,
-	ValueFactory,
 	ModuleExport,
 	PathResolve,
 	Module,
@@ -249,7 +249,7 @@ export function parseDeps(fileAst : t.File) : string[] {
 /**
  * @internal
  */
-export async function transformJSCode(source : string, moduleSourceType : boolean, filename : AbstractPath, additionalBabelParserPlugins : Options['additionalBabelParserPlugins'], additionalBabelPlugins : Options['additionalBabelPlugins']) : Promise<[string[], string]> {
+export async function transformJSCode(source : string, moduleSourceType : boolean, filename : AbstractPath, additionalBabelParserPlugins?: ParserPlugin[], additionalBabelPlugins?: Record<string, any>) : Promise<[string[], string]> {
 
 	let ast: t.File;
 	try {
@@ -258,11 +258,7 @@ export async function transformJSCode(source : string, moduleSourceType : boolea
 			// doc: https://babeljs.io/docs/en/babel-parser#options
 			sourceType: moduleSourceType ? 'module' : 'script',
 			sourceFilename: filename.toString(),
-			plugins:  [
-//				'optionalChaining',
-//				'nullishCoalescingOperator',
-				...additionalBabelParserPlugins !== undefined ? additionalBabelParserPlugins : [],
-			],
+			plugins:  additionalBabelParserPlugins ?? [],
 		});
 	} catch(ex) {
 
