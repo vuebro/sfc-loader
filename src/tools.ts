@@ -271,7 +271,7 @@ export function parseDeps(fileAst : t.File) : string[] {
 /**
  * @internal
  */
-export async function transformJSCode(source : string, moduleSourceType : boolean, filename : AbstractPath, additionalBabelParserPlugins : Options['additionalBabelParserPlugins'], additionalBabelPlugins : Options['additionalBabelPlugins'], log : Options['log'], devMode : boolean = false) : Promise<[string[], string]> {
+export async function transformJSCode(source : string, moduleSourceType : boolean, filename : AbstractPath, additionalBabelParserPlugins : Options['additionalBabelParserPlugins'], additionalBabelPlugins : Options['additionalBabelPlugins'], log : Options['log']) : Promise<[string[], string]> {
 
 	let ast: t.File;
 	try {
@@ -304,10 +304,9 @@ export async function transformJSCode(source : string, moduleSourceType : boolea
 		babelrc: false,
 		configFile: false,
 		highlightCode: false,
-		compact: !devMode, // doc: All optional newlines and whitespace will be omitted when generating code in compact mode.
-		comments: devMode,
-		retainLines: devMode,
-		//envName: devMode ? 'development' : 'production', see 'process.env.BABEL_ENV': JSON.stringify(mode),
+		compact: true, // doc: All optional newlines and whitespace will be omitted when generating code in compact mode.
+		comments: false,
+		retainLines: false,
 
 		//minified,
 		sourceType: moduleSourceType ? 'module' : 'script',
