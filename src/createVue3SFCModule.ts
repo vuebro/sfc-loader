@@ -69,7 +69,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		additionalBabelParserPlugins = [],
 		additionalBabelPlugins = {},
 		customBlockHandler,
-		devMode = false,
 	} = options;
 
 	// vue-loader next: https://github.com/vuejs/vue-loader/blob/next/src/index.ts#L91
@@ -128,7 +127,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				[
 					vueVersion,
 					isProd,
-					devMode,
 					descriptor.script?.content,
 					descriptor.script?.lang,
 					descriptor.scriptSetup?.content,
@@ -163,7 +161,7 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			// note:
 			//   scriptBlock.content is the script code after vue transformations
 			//   scriptBlock.scriptAst is the script AST before vue transformations
-			return [scriptBlock.bindings, ...await transformJSCode(scriptBlock.content, true, strFilename, [ ...contextBabelParserPlugins, ...additionalBabelParserPlugins ], { ...contextBabelPlugins, ...additionalBabelPlugins }, log, devMode)];
+			return [scriptBlock.bindings, ...await transformJSCode(scriptBlock.content, true, strFilename, [ ...contextBabelParserPlugins, ...additionalBabelParserPlugins ], { ...contextBabelPlugins, ...additionalBabelPlugins }, log)];
 
 		});
 
@@ -184,7 +182,6 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				compiledCache,
 				[
 					vueVersion,
-					devMode,
 					compileTemplateOptions.source,
 					compileTemplateOptions.compilerOptions.delimiters,
 					compileTemplateOptions.compilerOptions.whitespace,
@@ -216,7 +213,7 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 			for ( const err of template.tips )
 				log?.('info', 'SFC template', err);
 
-			return await transformJSCode(template.code, true, descriptor.filename, additionalBabelParserPlugins, additionalBabelPlugins, log, devMode);
+			return await transformJSCode(template.code, true, descriptor.filename, additionalBabelParserPlugins, additionalBabelPlugins, log);
 		});
 
 		await loadDeps(filename, templateDepsList, options);
