@@ -388,12 +388,6 @@ export type Options = {
  	customBlockHandler?(block : CustomBlock, filename : AbstractPath, options : Options) : Promise<CustomBlockCallback | undefined>,
 	
 	  
-/**
- * Set development mode
- * prevent minification, allow debugger statement, 
- */
-	devMode?: boolean,
-
 }
 
 
