@@ -23,6 +23,8 @@ import {
 	transformJSCode,
 	loadDeps,
 	loadModuleInternal,
+	createCJSModule,
+	getResource,
 } from './tools'
 
 import {
@@ -63,14 +65,12 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 		isCustomElement,
 		moduleCache,
 		compiledCache,
-		getResource,
 		addStyle,
 		log,
 		additionalBabelParserPlugins = [],
 		additionalBabelPlugins = {},
 		customBlockHandler,
 		devMode = false,
-		createCJSModule,
 		processStyles,
 	} = options;
 
