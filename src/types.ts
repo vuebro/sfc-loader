@@ -367,37 +367,6 @@ export type Options = {
 
 
 /**
- * creates a CommonJS module from JS source string.
- * *(optional)* 
- */
-	createCJSModule?(refPath : AbstractPath, source : string, options : Options) : Module,
-
-
-
-/**
- * Abstact path handling
- * *(optional)*
- */
- 	pathResolve?: PathResolve,
-
-/**
- * by default, remove the search string
- * in situation where you need to keep the path intact, use `getPathname: path => path`
- * @param path  a path that may contains extra components like search params or hash (eg. ./mydir/mycomponent.vue?v=123)
- * @returns the pathname component of the path withouy any orher component (eg. ./mydir/mycomponent.vue)
- */	
-	getPathname?: (path : string) => string,
-
-/**
- * Abstact resource handling
- * *(optional)*
- *
- */
-	getResource?(pathCx : PathContext, options : Options) : Resource,
-
-
-
-/**
  * Called for each custom block.
  * @returns A Promise of the module or undefined
  *
