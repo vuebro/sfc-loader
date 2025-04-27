@@ -13,7 +13,6 @@ import {
 	Options,
 	Resource,
 	PathContext,
-	LangProcessor,
 	AbstractPath,
 } from './types'
 
@@ -115,47 +114,6 @@ function defaultGetResource(pathCx : PathContext, options : Options) : Resource 
 }
 
 
-/**
- * This is the main function.
- * This function is intended to be used only to load the entry point of your application.
- * If for some reason you need to use it in your components, be sure to share at least the options.`moduleCache` object between all calls.
- *
- * @param path  The path of the `.vue` file. If path is not a path (eg. an string ID), your [[getFile]] function must return a [[File]] object.
- * @param options  The options
- * @returns A Promise of the component
- *
- * **example using `Vue.defineAsyncComponent`:**
- *
- * ```javascript
- *
- *	const app = Vue.createApp({
- *		components: {
- *			'my-component': Vue.defineAsyncComponent( () => loadModule('./myComponent.vue', options) )
- *		},
- *		template: '<my-component></my-component>'
- *	});
- *
- * ```
- *
- * **example using `await`:**
- *
- * ```javascript
-
- * ;(async () => {
- *
- *		const app = Vue.createApp({
- *			components: {
- *				'my-component': await loadModule('./myComponent.vue', options)
- *			},
- *			template: '<my-component></my-component>'
- *		});
- *
- * })()
- * .catch(ex => console.error(ex));
- *
- * ```
- *
- */
 export async function loadModule(path : AbstractPath, options : Options = throwNotDefined('options')) : Promise<ModuleExport> {
 
 	const {
@@ -193,29 +151,4 @@ export async function loadModule(path : AbstractPath, options : Options = throwN
 	}
 
 	return await loadModuleInternal( { refPath: undefined, relPath: path }, normalizedOptions);
-}
-
-/**
- * Convert a function to template processor interface (consolidate)
- */
- export function buildTemplateProcessor(processor: LangProcessor) {
-	return {
-		render: (source: string, preprocessOptions: string, cb: (_err : any, _res : any) => void) => {
-			try {
-				const ret = processor(source, preprocessOptions)
-				if (typeof ret === 'string') {
-					cb(null, ret)
-				} else {
-					ret.then(processed => {
-						cb(null, processed)
-					})
-					ret.catch(err => {
-						cb(err, null)
-					})
-				}
-			} catch (err) {
-				cb(err, null)
-			}
-		}
-	}
 }
