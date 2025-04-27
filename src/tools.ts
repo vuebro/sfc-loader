@@ -38,6 +38,13 @@ import {
 
 import { createSFCModule } from './createVue3SFCModule'
 
+export const log = (type: string, ...data: any[]): void => {
+  (
+    window.console[type as keyof Console] as (
+      ...optionalParams: string[]
+    ) => void
+  )(...data.map((value: string) => decodeURIComponent(value)));
+};
 
 /**
  * Default getPathname implementation
@@ -85,7 +92,7 @@ const pathResolve : PathResolve = ({ refPath, relPath } : PathContext, options :
  */
 export function getResource(pathCx : PathContext, options : Options) : Resource {
 
-	const { getFile, log } = options;
+	const { getFile } = options;
 	const path = pathResolve(pathCx, options);
 	const pathStr = path.toString();
 	return {
@@ -271,7 +278,7 @@ export function parseDeps(fileAst : t.File) : string[] {
 /**
  * @internal
  */
-export async function transformJSCode(source : string, moduleSourceType : boolean, filename : AbstractPath, additionalBabelParserPlugins : Options['additionalBabelParserPlugins'], additionalBabelPlugins : Options['additionalBabelPlugins'], log : Options['log']) : Promise<[string[], string]> {
+export async function transformJSCode(source : string, moduleSourceType : boolean, filename : AbstractPath, additionalBabelParserPlugins : Options['additionalBabelParserPlugins'], additionalBabelPlugins : Options['additionalBabelPlugins']) : Promise<[string[], string]> {
 
 	let ast: t.File;
 	try {
@@ -329,7 +336,7 @@ export async function transformJSCode(source : string, moduleSourceType : boolea
 
 export async function loadModuleInternal(pathCx : PathContext, options : Options) : Promise<ModuleExport> {
 
-	const { moduleCache, loadModule, addStyle } = options;
+	const { moduleCache, addStyle } = options;
 
 	const { id, path, getContent } = getResource(pathCx, options);
 
@@ -346,9 +353,6 @@ export async function loadModuleInternal(pathCx : PathContext, options : Options
 
 		// note: null module is accepted
 		let module : ModuleExport | undefined | null = undefined;
-
-		if ( loadModule )
-			module = await loadModule(id, options);
 
 		if ( module === undefined ) {
 
