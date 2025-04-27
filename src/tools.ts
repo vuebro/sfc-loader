@@ -1,11 +1,11 @@
 // astexplorer: https://astexplorer.net/
 // babel-core doc: https://babeljs.io/docs/en/babel-core
 
+import traverse from '@babel/traverse';
+import type { NodePath } from '@babel/traverse';
+import * as t from '@babel/types';
 import {
-	traverse,
-	NodePath,
 	transformFromAstAsync as babel_transformFromAstAsync,
-	types as t,
 } from '@babel/core';
 
 import {
@@ -15,14 +15,10 @@ import {
 
 import {
 	codeFrameColumns,
-	SourceLocation,
 } from '@babel/code-frame';
 
 // @ts-ignore (Could not find a declaration file for module '@babel/plugin-transform-modules-commonjs')
 import babelPluginTransformModulesCommonjs from '@babel/plugin-transform-modules-commonjs'
-
-// @ts-ignore (TS7016: Could not find a declaration file for module '@babel/plugin-transform-typescript'.)
-import babelPlugin_typescript from '@babel/plugin-transform-typescript'
 
 import SparkMD5 from 'spark-md5'
 
@@ -35,7 +31,6 @@ import {
 	LoadingType,
 	PathContext,
 	AbstractPath,
-	File,
 } from './types'
 
 import { createSFCModule } from './createVue3SFCModule'
@@ -70,25 +65,6 @@ export function formatErrorLineColumn(message : string, path : string, source : 
 
   return formatError(codeFrameColumns(source, location, { message }), path, source)
 }
-
-/**
- * @internal
- */
-export function formatErrorStartEnd(message : string, path : string, source : string, start : number, end? : number) : string {
-	if (!start) {
-	  return formatError(message, path, source)
-  }
-
-  const location: SourceLocation = {
-    start: { line: 1, column: start }
-  };
-  if (end) {
-    location.end = {line: 1, column: end}
-  }
-
-  return formatError(codeFrameColumns(source, location, { message }), path, source)
-}
-
 
 /**
  * @internal
@@ -364,33 +340,6 @@ export function defaultCreateCJSModule(refPath : AbstractPath, source : string, 
 	moduleFunction.call(module.exports, module.exports, require, module, refPath, pathResolve({ refPath, relPath: '.' }, options), importFunction);
 
 	return module;
-}
-
-
-/**
- * @internal
- */
-export async function createJSModule(source : string, moduleSourceType : boolean, filename : AbstractPath, options : Options) : Promise<ModuleExport> {
-
-	const { compiledCache, additionalBabelParserPlugins, additionalBabelPlugins, createCJSModule, log } = options;
-
-	const [depsList, transformedSource] =
-		await withCache(
-			compiledCache,
-			[
-				source,
-				filename,
-				options.devMode,
-				additionalBabelParserPlugins ? additionalBabelParserPlugins : '',
-				additionalBabelPlugins ? Object.keys(additionalBabelPlugins) : '',
-			],
-			async () => {
-
-		return await transformJSCode(source, moduleSourceType, filename, additionalBabelParserPlugins, additionalBabelPlugins, log, options.devMode);
-	});
-
-	await loadDeps(filename, depsList, options);
-	return createCJSModule(filename, transformedSource, options).exports;
 }
 
 
