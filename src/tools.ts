@@ -1,5 +1,6 @@
-// astexplorer: https://astexplorer.net/
-// babel-core doc: https://babeljs.io/docs/en/babel-core
+import {
+	posix as Path
+} from 'path'
 
 import traverse from '@babel/traverse';
 import type { NodePath } from '@babel/traverse';
@@ -27,13 +28,99 @@ import {
 	Options,
 	ValueFactory,
 	ModuleExport,
+	PathResolve,
 	Module,
 	LoadingType,
+	Resource,
 	PathContext,
 	AbstractPath,
 } from './types'
 
 import { createSFCModule } from './createVue3SFCModule'
+
+
+/**
+ * Default getPathname implementation
+ * remove search string
+ */
+const getPathname = (path : string) => {
+
+	// alternative: new URL(path, 'file://').pathname
+	const searchPos = path.indexOf('?');
+	if ( searchPos !== -1 )
+		return path.slice(0, searchPos);
+	return path;
+}
+
+
+/**
+ * Default resolve implementation
+ * resolve() should handle 3 situations :
+ *  - resolve a relative path ( eg. import './details.vue' )
+ *  - resolve an absolute path ( eg. import '/components/card.vue' )
+ *  - resolve a module name ( eg. import { format } from 'date-fns' )
+ */
+const pathResolve : PathResolve = ({ refPath, relPath } : PathContext, options : Options) => {
+
+	// initial resolution: refPath is not defined
+	if ( refPath === undefined )
+		return relPath;
+
+	const relPathStr = relPath.toString();
+	
+	// is non-relative path ?
+	if ( relPathStr[0] !== '.' )
+		return relPath;
+		
+	// note :
+	//  normalize('./test') -> 'test'
+	//  normalize('/test') -> '/test'
+
+	return Path.normalize(Path.join(Path.dirname(getPathname(refPath.toString())), relPathStr));
+}
+
+/**
+ * Default getResource implementation
+ * by default, getContent() use the file extension as file type.
+ */
+export function getResource(pathCx : PathContext, options : Options) : Resource {
+
+	const { getFile, log } = options;
+	const path = pathResolve(pathCx, options);
+	const pathStr = path.toString();
+	return {
+		id: pathStr,
+		path: path,
+		getContent: async () => {
+
+			const res = await getFile(path);
+
+			if ( typeof res === 'string' || res instanceof ArrayBuffer ) {
+
+				return {
+					type: Path.extname(getPathname(pathStr)),
+					getContentData: async (asBinary) => {
+
+						if ( res instanceof ArrayBuffer !== asBinary )
+							log?.('warn', `unexpected data type. ${ asBinary ? 'binary' : 'string' } is expected for "${ path }"`);
+						
+						return res;
+					},
+				}
+			}
+			
+			if ( !res ) {
+				
+				log?.('error', `There is no file avaialable such as "${ path }"`);
+			}			
+
+			return {
+				type: res.type !== undefined ? res.type : Path.extname(getPathname(pathStr)),
+				getContentData: res.getContentData,
+			}
+		}
+	};
+}
 
 
 /**
@@ -245,7 +332,7 @@ export async function loadModuleInternal(pathCx : PathContext, options : Options
 
 	const { moduleCache, loadModule, addStyle } = options;
 
-	const { id, path, getContent } = options.getResource(pathCx, options);
+	const { id, path, getContent } = getResource(pathCx, options);
 
 	if ( id in moduleCache ) {
 
@@ -306,9 +393,9 @@ export async function loadModuleInternal(pathCx : PathContext, options : Options
  * Create a cjs module
  * @internal
  */
-export function defaultCreateCJSModule(refPath : AbstractPath, source : string, options : Options) : Module {
+export function createCJSModule(refPath : AbstractPath, source : string, options : Options) : Module {
 
-	const { moduleCache, pathResolve, getResource } = options;
+	const { moduleCache } = options;
 
 	const require = function(relPath : string) {
 
