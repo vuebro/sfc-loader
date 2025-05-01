@@ -1,20 +1,22 @@
 {
-	"compilerOptions": {
-		"noImplicitAny": true,
-		"allowJs": true,
-		"module": "ESNext",
-		"target": "ES2017",
-		"allowSyntheticDefaultImports": true,
-		"lib": [
-			"ESNext",
-			"DOM"
-		],
-		"moduleResolution": "node",
-		"resolveJsonModule": true,
-		"declaration": true,
-		"outDir": "./dist"
-	},
-	"include": [
-		"./src/**/*.ts"
-	]
+  "compilerOptions": {
+    "allowJs": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "preserve",
+    "moduleDetection": "force",
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "esnext"
+  },
+  "include": ["./src/**/*.ts"]
 }
