@@ -1,5 +1,5 @@
 {
-  "name": "@vues3/vue3-sfc-loader",
+  "name": "@vues3/sfc-loader",
   "description": "Single File Component loader",
   "keywords": [
     "vue",
@@ -8,41 +8,51 @@
     "component-loader",
     "nobuild"
   ],
-  "homepage": "https://github.com/FranckFreiburger/vue3-sfc-loader",
+  "homepage": "https://github.com/vues3/sfc-loader#readme",
+  "bugs": {
+    "url": "https://github.com/vues3/sfc-loader/issues"
+  },
   "author": {
-    "name": "Franck FREIBURGER",
-    "email": "franck.freiburger@gmail.com",
-    "url": "https://franck-freiburger.com/"
+    "name": "Jerry Bruwes",
+    "email": "jbruwes@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vues3/vue3-sfc-loader.git"
+    "url": "git+https://github.com/vues3/sfc-loader.git"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "version": "0.10.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "webpack"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build": "tsc"
   },
   "devDependencies": {
-    "@types/babel__code-frame": "^7.0.6",
+    "@eslint/js": "^9.25.1",
     "@types/babel__core": "^7.20.5",
-    "@types/spark-md5": "^3.0.5",
-    "ts-loader": "^9.5.2",
-    "webpack-cli": "^6.0.1",
-    "node-polyfill-webpack-plugin": "^4.1.0"
+    "@types/hash-sum": "^1.0.2",
+    "@types/node": "^22.15.3",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-import-resolver-typescript": "^4.3.4",
+    "eslint-plugin-import-x": "^4.11.0",
+    "eslint-plugin-perfectionist": "^4.12.3",
+    "eslint-plugin-prettier": "^5.2.6",
+    "jiti": "^2.4.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.1"
   },
   "dependencies": {
-    "@babel/code-frame": "^7.26.2",
-    "@babel/core": "^7.26.10",
-    "@babel/parser": "^7.27.0",
-    "@babel/traverse": "7.27.0",
-    "@babel/types": "^7.27.0",
-    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
-    "@babel/plugin-transform-typescript": "^7.27.0",
-    "@vue/compiler-dom": "^3.5.13",
+    "@babel/core": "^7.27.1",
+    "@babel/parser": "^7.27.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@babel/plugin-transform-typescript": "^7.27.1",
+    "@babel/traverse": "^7.27.1",
+    "@babel/types": "^7.27.1",
+    "@vue/babel-plugin-jsx": "^1.4.0",
     "@vue/compiler-sfc": "^3.5.13",
-    "spark-md5": "^3.0.2"
+    "@vueuse/core": "^13.1.0",
+    "hash-sum": "^2.0.0"
   }
 }
