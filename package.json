@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vues3/sfc-loader.git"
+    "url": "git+https://github.com/vues3/vue3-sfc-loader.git"
   },
   "license": "AGPL-3.0-only",
   "version": "0.10.1",
