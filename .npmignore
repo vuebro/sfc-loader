@@ -1,6 +1,5 @@
 .github/
 .vscode/
 src/
-bun.lock
+eslint.config.ts
 tsconfig.json
-webpack.config.js
