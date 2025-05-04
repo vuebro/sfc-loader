@@ -42,44 +42,53 @@ const addStyle = async (
       `data:text/javascript;base64,${btoa(Array.from(new TextEncoder().encode(code), (byte) => String.fromCodePoint(byte)).join(""))}`
     ),
   loadModule = async (filename: string) => {
-    const expressionPlugins: CompilerOptions["expressionPlugins"] = [],
+    const { descriptor, errors } = parse(await (await fetch(filename)).text(), {
+      filename,
+    });
+    const compilerOptions: CompilerOptions = { expressionPlugins: [] },
+      scriptBlocks = ["script", "scriptSetup"],
+      contents = await Promise.all(
+        scriptBlocks.map(async (key) => {
+          const { lang = "js", src } = (descriptor[
+            key as keyof SFCDescriptor
+          ] ?? {}) as SFCScriptBlock;
+          if (/[jt]sx$/.test(lang))
+            compilerOptions.expressionPlugins?.push("jsx");
+          if (/tsx?$/.test(lang))
+            compilerOptions.expressionPlugins?.push("typescript");
+          return src && (await (await fetch(src)).text());
+        }),
+      ),
       id = `data-v-${hash(filename)}`,
       jsxRuntime = "preserve",
       module: Record<string, object | string> = {},
-      { descriptor, errors } = parse(await (await fetch(filename)).text(), {
-        filename,
-      });
-    const scoped = descriptor.styles.some(({ scoped }) => scoped);
-    let bindingMetadata;
+      scoped = descriptor.styles.some(({ scoped }) => scoped),
+      { expressionPlugins: transforms } = compilerOptions as {
+        expressionPlugins: Transform[];
+      };
     log(errors);
-    ["script", "scriptSetup"].forEach((key) => {
-      const { lang = "" } = (descriptor[key as keyof SFCDescriptor] ??
-        {}) as SFCScriptBlock;
-      if (/[jt]sx$/.test(lang)) expressionPlugins.push("jsx");
-      if (/tsx?$/.test(lang)) expressionPlugins.push("typescript");
-    });
     if (scoped) module.__scopeId = id;
     if (descriptor.script || descriptor.scriptSetup) {
-      if (descriptor.script?.src)
-        descriptor.script.content = await (
-          await fetch(descriptor.script.src)
-        ).text();
+      scriptBlocks.forEach((key, i) => {
+        const scriptBlock = descriptor[key as keyof SFCDescriptor] as
+          | SFCScriptBlock
+          | undefined;
+        if (scriptBlock && contents[i] !== undefined)
+          scriptBlock.content = contents[i];
+      });
       const {
         bindings,
         content,
         warnings = [],
-      } = compileScript(descriptor, { id, inlineTemplate: true });
+      } = compileScript(descriptor, { id, inlineTemplate: false });
       log(warnings);
-      bindingMetadata = bindings;
+      if (bindings) compilerOptions.bindingMetadata = bindings;
       Object.assign(
         module,
         (
           (await inject(
-            expressionPlugins.length
-              ? transform(content, {
-                  jsxRuntime,
-                  transforms: expressionPlugins as Transform[],
-                }).code
+            transforms.length
+              ? transform(content, { jsxRuntime, transforms }).code
               : content,
           )) as Record<string, object>
         ).default,
@@ -88,10 +97,7 @@ const addStyle = async (
     if (descriptor.template) {
       const { code, errors, tips } = compileTemplate({
         ast: descriptor.template.ast,
-        compilerOptions: {
-          ...(bindingMetadata && { bindingMetadata }),
-          expressionPlugins,
-        },
+        compilerOptions,
         filename: descriptor.filename,
         id,
         scoped,
@@ -108,11 +114,8 @@ const addStyle = async (
       Object.assign(
         module,
         await inject(
-          expressionPlugins.length
-            ? transform(code, {
-                jsxRuntime,
-                transforms: expressionPlugins as Transform[],
-              }).code
+          transforms.length
+            ? transform(code, { jsxRuntime, transforms }).code
             : code,
         ),
       );
