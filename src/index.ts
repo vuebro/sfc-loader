@@ -35,7 +35,7 @@ const addStyle = async (
       source: src ? await (await fetch(src)).text() : content,
     });
     log(errors);
-    useStyleTag(code, { id });
+    useStyleTag(code, scoped ? { id } : undefined);
   },
   inject = (code: string) =>
     import(
