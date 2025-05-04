@@ -21,7 +21,7 @@
     "url": "git+https://github.com/vues3/sfc-loader.git"
   },
   "license": "AGPL-3.0-only",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "main": "./dist/index.js",
   "scripts": {
