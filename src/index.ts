@@ -17,11 +17,19 @@ import { useStyleTag } from "@vueuse/core";
 import hash from "hash-sum";
 import { transform } from "sucrase";
 
-const log = (msgs: (CompilerError | Error | string)[]) => {
-  msgs.forEach((msg) => {
-    console.log(msg);
-  });
-};
+const fetchText = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      return response.ok ? response : new Response("");
+    } catch {
+      return new Response("");
+    }
+  },
+  log = (msgs: (CompilerError | Error | string)[]) => {
+    msgs.forEach((msg) => {
+      console.log(msg);
+    });
+  };
 const addStyle = async (
     id: string,
     { filename }: SFCDescriptor,
@@ -32,7 +40,7 @@ const addStyle = async (
       id,
       modules: !!module,
       scoped,
-      source: src ? await (await fetch(src)).text() : content,
+      source: src ? await (await fetchText(src)).text() : content,
     });
     log(errors);
     useStyleTag(code, scoped ? { id } : undefined);
@@ -42,9 +50,12 @@ const addStyle = async (
       `data:text/javascript;base64,${btoa(Array.from(new TextEncoder().encode(code), (byte) => String.fromCodePoint(byte)).join(""))}`
     ),
   loadModule = async (filename: string) => {
-    const { descriptor, errors } = parse(await (await fetch(filename)).text(), {
-      filename,
-    });
+    const { descriptor, errors } = parse(
+      await (await fetchText(filename)).text(),
+      {
+        filename,
+      },
+    );
     const compilerOptions: CompilerOptions = { expressionPlugins: [] },
       scriptBlocks = ["script", "scriptSetup"],
       contents = await Promise.all(
@@ -56,7 +67,7 @@ const addStyle = async (
             compilerOptions.expressionPlugins?.push("jsx");
           if (/tsx?$/.test(lang))
             compilerOptions.expressionPlugins?.push("typescript");
-          return src && (await (await fetch(src)).text());
+          return src && (await (await fetchText(src)).text());
         }),
       ),
       id = `data-v-${hash(filename)}`,
@@ -103,7 +114,7 @@ const addStyle = async (
         scoped,
         slotted: descriptor.slotted,
         source: descriptor.template.src
-          ? await (await fetch(descriptor.template.src)).text()
+          ? await (await fetchText(descriptor.template.src)).text()
           : descriptor.template.content,
         // @ts-expect-error TODO remove expect-error after 3.6
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
