@@ -43,7 +43,7 @@
     "typescript-eslint": "^8.32.1"
   },
   "dependencies": {
-    "@vue/compiler-sfc": "^3.5.13",
+    "@vue/compiler-sfc": "^3.5.14",
     "@vueuse/core": "^13.2.0",
     "hash-sum": "^2.0.0",
     "sucrase": "^3.35.0"
