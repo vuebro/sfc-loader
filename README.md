@@ -4,10 +4,10 @@ Single File Component loader for Vue3. Load .vue files directly from your HTML. 
 
 ## Installation
 
-Install @vues3/sfc-loader with npm
+Install @vuebro/sfc-loader with npm
 
 ```bash
-npm install @vues3/sfc-loader
+npm install @vuebro/sfc-loader
 ```
 
 ## Usage/Examples
@@ -19,7 +19,7 @@ To load .vue files dynamically at runtime just use loadModule function:
 ```javascript
 <script setup>
 import { defineAsyncComponent } from "vue";
-import loadModule from "@vues3/sfc-loader";
+import loadModule from "@vuebro/sfc-loader";
 
 const AdminPage = defineAsyncComponent(() =>
   loadModule('./components/AdminPageComponent.vue')
