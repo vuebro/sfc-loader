@@ -91,7 +91,7 @@ const addStyle = async (
         bindings,
         content,
         warnings = [],
-      } = compileScript(descriptor, { id, inlineTemplate: false });
+      } = compileScript(descriptor, { id });
       log(warnings);
       if (bindings) compilerOptions.bindingMetadata = bindings;
       Object.assign(
