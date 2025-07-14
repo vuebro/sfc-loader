@@ -17,12 +17,13 @@ import { useStyleTag } from "@vueuse/core";
 import hash from "hash-sum";
 import { transform } from "sucrase";
 
-const fetchText = async (url: string) => {
+const body = "<template></template>",
+  fetchText = async (url: string) => {
     try {
       const response = await fetch(url);
-      return response.ok ? response : new Response("");
+      return response.ok ? response : new Response(body);
     } catch {
-      return new Response("");
+      return new Response(body);
     }
   },
   log = (msgs: (CompilerError | Error | string)[]) => {
@@ -51,10 +52,8 @@ const addStyle = async (
     ),
   loadModule = async (filename: string) => {
     const { descriptor, errors } = parse(
-      await (await fetchText(filename)).text(),
-      {
-        filename,
-      },
+      (await (await fetchText(filename)).text()) || body,
+      { filename },
     );
     const compilerOptions: CompilerOptions = { expressionPlugins: [] },
       scriptBlocks = ["script", "scriptSetup"],
